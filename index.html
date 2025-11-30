@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aesthetic Pomodoro Timer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            transition: background 1.5s ease;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: -1;
+        }
+
+        .main-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 1;
+        }
+
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .title {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .timer-circle {
+            width: 320px;
+            height: 320px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            margin: 0 auto 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            transition: all 0.5s ease;
+        }
+
+        .timer-display {
+            font-size: 4.5rem;
+            font-weight: 300;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .timer-label {
+            position: absolute;
+            bottom: 25px;
+            font-size: 1.3rem;
+            opacity: 0.9;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            padding: 14px 28px;
+            border-radius: 30px;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary {
+            background: rgba(255, 255, 255, 0.3);
+            font-weight: 600;
+        }
+
+        .settings {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            margin-bottom: 25px;
+        }
+
+        .setting-item {
+            text-align: center;
+        }
+
+        .setting-item label {
+            display: block;
+            margin-bottom: 8px;
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .setting-item input {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 12px;
+            padding: 10px;
+            color: white;
+            width: 90px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            font-size: 1.1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .progress {
+            margin-top: 20px;
+            font-size: 1rem;
+            opacity: 0.9;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .side-panels {
+            display: flex;
+            width: 350px;
+            flex-direction: column;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            overflow-y: auto;
+            height: 100vh;
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .panel-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+
+        .option-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 12px;
+            padding: 12px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-align: left;
+        }
+
+        .option-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateX(5px);
+        }
+
+        .option-btn.active {
+            background: rgba(255, 255, 255, 0.35);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .option-btn i {
+            font-size: 1.2rem;
+            width: 24px;
+        }
+
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .floating-element {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-25px) rotate(180deg); }
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 10px 0;
+        }
+
+        .volume-slider {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .volume-icon {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        .pulse {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+
+        .sound-status {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-top: 5px;
+            text-align: center;
+        }
+
+        .click-message {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        .sound-test {
+            margin-top: 10px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 1100px) {
+            body {
+                flex-direction: column;
+            }
+            
+            .side-panels {
+                width: 100%;
+                height: auto;
+                flex-direction: row;
+                overflow-x: auto;
+            }
+            
+            .panel {
+                min-width: 300px;
+                margin-right: 15px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px 20px;
+            }
+            
+            .title {
+                font-size: 2.2rem;
+            }
+            
+            .timer-circle {
+                width: 260px;
+                height: 260px;
+            }
+            
+            .timer-display {
+                font-size: 3.5rem;
+            }
+            
+            .side-panels {
+                flex-direction: column;
+            }
+            
+            .panel {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="side-panels">
+        <div class="panel">
+            <div class="panel-title"><i class="fas fa-image"></i> Backgrounds</div>
+            <div class="options-list" id="backgroundOptions"></div>
+        </div>
+        
+        <div class="panel">
+            <div class="panel-title"><i class="fas fa-volume-up"></i> Ambient Sounds</div>
+            <div class="options-list" id="soundOptions"></div>
+            <div class="volume-control">
+                <i class="fas fa-volume-down volume-icon"></i>
+                <input type="range" min="0" max="1" step="0.1" value="0.5" class="volume-slider" id="volumeSlider">
+                <i class="fas fa-volume-up volume-icon"></i>
+            </div>
+            <div class="sound-status" id="soundStatus">No sound playing</div>
+            <div class="click-message">Click anywhere to enable sounds</div>
+            <div class="sound-test" id="soundTest">Sound System: Testing...</div>
+        </div>
+    </div>
+
+    <div class="main-panel">
+        <div class="floating-elements" id="floatingElements"></div>
+
+        <div class="container">
+            <h1 class="title"><i class="fas fa-hourglass-half"></i> Aesthetic Pomodoro</h1>
+            <p class="subtitle">Stay focused and productive with beautiful ambiance</p>
+            
+            <div class="timer-circle">
+                <div class="timer-display" id="timerDisplay">25:00</div>
+                <div class="timer-label" id="timerLabel">Focus Time</div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="startBtn"><i class="fas fa-play"></i> Start</button>
+                <button class="btn" id="pauseBtn"><i class="fas fa-pause"></i> Pause</button>
+                <button class="btn" id="resetBtn"><i class="fas fa-redo"></i> Reset</button>
+            </div>
+            
+            <div class="settings">
+                <div class="setting-item">
+                    <label for="focusTime"><i class="fas fa-brain"></i> Focus (min)</label>
+                    <input type="number" id="focusTime" value="25" min="1" max="60">
+                </div>
+                <div class="setting-item">
+                    <label for="breakTime"><i class="fas fa-coffee"></i> Break (min)</label>
+                    <input type="number" id="breakTime" value="5" min="1" max="30">
+                </div>
+            </div>
+            
+            <div class="progress" id="progressText">
+                <i class="fas fa-tasks"></i> Session 1 of 4
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // المتغيرات الأساسية
+        let timer;
+        let isRunning = false;
+        let isFocusTime = true;
+        let timeLeft = 25 * 60;
+        let sessionsCompleted = 0;
+        const totalSessions = 4;
+        let currentAudio = null;
+        let currentBackground = 'gradient-purple';
+        let currentSound = null;
+        let globalVolume = 0.5;
+        let audioEnabled = false;
+
+        // قائمة الخلفيات
+        const backgrounds = [
+            { id: 'gradient-purple', name: 'Purple', class: 'gradient-purple', icon: 'palette' },
+            { id: 'gradient-blue', name: 'Blue', class: 'gradient-blue', icon: 'palette' },
+            { id: 'gradient-sunset', name: 'Sunset', class: 'gradient-sunset', icon: 'sun' },
+            { id: 'gradient-forest', name: 'Forest', class: 'gradient-forest', icon: 'tree' },
+            { id: 'gradient-ocean', name: 'Ocean', class: 'gradient-ocean', icon: 'water' },
+            { id: 'gradient-lavender', name: 'Lavender', class: 'gradient-lavender', icon: 'spa' }
+        ];
+
+        // قائمة الأصوات المضمونة العمل
+        const sounds = [
+            { 
+                id: 'rain', 
+                name: 'Gentle Rain', 
+                icon: 'cloud-rain',
+                file: 'https://assets.mixkit.co/sfx/preview/mixkit-rain-loop-1249.mp3'
+            },
+            { 
+                id: 'cafe', 
+                name: 'Coffee Shop', 
+                icon: 'coffee',
+                file: 'https://assets.mixkit.co/sfx/preview/mixkit-busy-coffee-shop-loop-445.mp3'
+            },
+            { 
+                id: 'waves', 
+                name: 'Ocean Waves', 
+                icon: 'water',
+                file: 'https://assets.mixkit.co/sfx/preview/mixkit-waves-on-the-beach-loop-1245.mp3'
+            },
+            { 
+                id: 'forest', 
+                name: 'Forest', 
+                icon: 'tree',
+                file: 'https://assets.mixkit.co/sfx/preview/mixkit-forest-ambience-1231.mp3'
+            },
+            { 
+                id: 'fireplace', 
+                name: 'Fireplace', 
+                icon: 'fire',
+                file: 'https://assets.mixkit.co/sfx/preview/mixkit-crackling-fireplace-loop-1381.mp3'
+            },
+            { 
+                id: 'keyboard', 
+                name: 'Keyboard', 
+                icon: 'keyboard',
+                file: 'https://assets.mixkit.co/sfx/preview/mixkit-keyboard-typing-1386.mp3'
+            },
+            { 
+                id: 'birds', 
+                name: 'Birds', 
+                icon: 'crow',
+                file: 'https://assets.mixkit.co/sfx/preview/mixkit-summer-birds-chirping-1243.mp3'
+            },
+            { 
+                id: 'white-noise', 
+                name: 'White Noise', 
+                icon: 'wind',
+                file: 'https://assets.mixkit.co/sfx/preview/mixkit-wind-in-the-trees-1241.mp3'
+            },
+            { 
+                id: 'river', 
+                name: 'River', 
+                icon: 'water',
+                file: 'https://assets.mixkit.co/sfx/preview/mixkit-river-stream-water-flow-1247.mp3'
+            },
+            { 
+                id: 'night', 
+                name: 'Night', 
+                icon: 'moon',
+                file: 'https://assets.mixkit.co/sfx/preview/mixkit-crickets-and-insects-in-the-wild-1250.mp3'
+            }
+        ];
+
+        // عناصر DOM
+        const timerDisplay = document.getElementById('timerDisplay');
+        const timerLabel = document.getElementById('timerLabel');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const focusTimeInput = document.getElementById('focusTime');
+        const breakTimeInput = document.getElementById('breakTime');
+        const progressText = document.getElementById('progressText');
+        const backgroundOptions = document.getElementById('backgroundOptions');
+        const soundOptions = document.getElementById('soundOptions');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const soundStatus = document.getElementById('soundStatus');
+        const soundTest = document.getElementById('soundTest');
+
+        // تهيئة الخلفيات
+        function initializeBackgrounds() {
+            backgrounds.forEach(bg => {
+                const btn = document.createElement('button');
+                btn.className = `option-btn ${bg.id === currentBackground ? 'active' : ''}`;
+                btn.innerHTML = `<i class="fas fa-${bg.icon}"></i> ${bg.name}`;
+                btn.addEventListener('click', () => changeBackground(bg.id));
+                backgroundOptions.appendChild(btn);
+            });
+            
+            const style = document.createElement('style');
+            style.textContent = `
+                .gradient-purple { background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); }
+                .gradient-blue { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+                .gradient-sunset { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+                .gradient-forest { background: linear-gradient(135deg, #4da0b0 0%, #d39d38 100%); }
+                .gradient-ocean { background: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%); }
+                .gradient-lavender { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // تهيئة الأصوات
+        function initializeSounds() {
+            sounds.forEach(sound => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<i class="fas fa-${sound.icon}"></i> ${sound.name}`;
+                btn.addEventListener('click', () => playSound(sound.id));
+                soundOptions.appendChild(btn);
+            });
+        }
+
+        // تغيير الخلفية
+        function changeBackground(bgId) {
+            currentBackground = bgId;
+            const bgClass = backgrounds.find(bg => bg.id === bgId).class;
+            document.body.className = '';
+            document.body.classList.add(bgClass);
+            
+            document.querySelectorAll('#backgroundOptions .option-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        // تشغيل الصوت
+        function playSound(soundId) {
+            if (!audioEnabled) {
+                soundStatus.textContent = "Please click anywhere to enable sounds first";
+                soundStatus.style.color = '#f87171';
+                return;
+            }
+            
+            // إيقاف الصوت الحالي
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
+            
+            // تحديث الأزرار النشطة
+            document.querySelectorAll('#soundOptions .option-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            const sound = sounds.find(s => s.id === soundId);
+            if (sound) {
+                currentAudio = new Audio();
+                currentAudio.src = sound.file;
+                currentAudio.loop = true;
+                currentAudio.volume = globalVolume;
+                
+                // محاولة تشغيل الصوت
+                const playPromise = currentAudio.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        soundStatus.textContent = `Playing: ${sound.name}`;
+                        soundStatus.style.color = '#4ade80';
+                        soundTest.textContent = `✓ Sound working: ${sound.name}`;
+                        soundTest.style.color = '#4ade80';
+                    }).catch(error => {
+                        console.log("Error playing sound: ", error);
+                        soundStatus.textContent = `Error: Could not play ${sound.name}`;
+                        soundStatus.style.color = '#f87171';
+                        soundTest.textContent = `✗ Sound error: ${sound.name}`;
+                        soundTest.style.color = '#f87171';
+                        event.target.classList.remove('active');
+                    });
+                }
+                
+                currentSound = soundId;
+            }
+        }
+
+        // إنشاء العناصر العائمة
+        function createFloatingElements() {
+            const container = document.getElementById('floatingElements');
+            const colors = ['rgba(255,255,255,0.1)', 'rgba(255,255,255,0.05)', 'rgba(255,255,255,0.15)'];
+            
+            for (let i = 0; i < 20; i++) {
+                const element = document.createElement('div');
+                const size = Math.random() * 80 + 20;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                
+                element.className = 'floating-element';
+                element.style.width = size + 'px';
+                element.style.height = size + 'px';
+                element.style.background = color;
+                element.style.left = Math.random() * 100 + '%';
+                element.style.top = Math.random() * 100 + '%';
+                element.style.animationDelay = Math.random() * 5 + 's';
+                element.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                
+                container.appendChild(element);
+            }
+        }
+
+        // تحديث العرض
+        function updateDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            progressText.textContent = `Session ${sessionsCompleted + 1} of ${totalSessions}`;
+            
+            if (timeLeft <= 300 && timeLeft > 0) {
+                timerDisplay.parentElement.classList.add('pulse');
+            } else {
+                timerDisplay.parentElement.classList.remove('pulse');
+            }
+        }
+
+        // بدء المؤقت
+        function startTimer() {
+            if (isRunning) return;
+            
+            isRunning = true;
+            startBtn.innerHTML = '<i class="fas fa-play"></i> Resume';
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                updateDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    isRunning = false;
+                    playGentleNotification();
+                    
+                    if (isFocusTime) {
+                        sessionsCompleted++;
+                        if (sessionsCompleted >= totalSessions) {
+                            setTimeout(() => {
+                                alert('Great job! You completed all sessions! Take a long break.');
+                            }, 500);
+                            sessionsCompleted = 0;
+                            switchToFocusTime();
+                        } else {
+                            switchToBreakTime();
+                        }
+                    } else {
+                        switchToFocusTime();
+                    }
+                }
+            }, 1000);
+        }
+
+        // إيقاف المؤقت
+        function pauseTimer() {
+            if (!isRunning) return;
+            clearInterval(timer);
+            isRunning = false;
+        }
+
+        // إعادة التعيين
+        function resetTimer() {
+            clearInterval(timer);
+            isRunning = false;
+            isFocusTime = true;
+            sessionsCompleted = 0;
+            switchToFocusTime();
+            startBtn.innerHTML = '<i class="fas fa-play"></i> Start';
+        }
+
+        // التبديل لوقت التركيز
+        function switchToFocusTime() {
+            isFocusTime = true;
+            timeLeft = parseInt(focusTimeInput.value) * 60;
+            timerLabel.innerHTML = '<i class="fas fa-brain"></i> Focus Time';
+            changeBackground('gradient-purple');
+            updateDisplay();
+        }
+
+        // التبديل لوقت الراحة
+        function switchToBreakTime() {
+            isFocusTime = false;
+            timeLeft = parseInt(breakTimeInput.value) * 60;
+            timerLabel.innerHTML = '<i class="fas fa-coffee"></i> Break Time';
+            changeBackground('gradient-blue');
+            updateDisplay();
+        }
+
+        // تشغيل إشعار لطيف
+        function playGentleNotification() {
+            if (!audioEnabled) return;
+            
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+                oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.2);
+                oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.4);
+                
+                oscillator.type = 'sine';
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 1);
+            } catch (e) {
+                console.log("Notification sound error:", e);
+            }
+        }
+
+        // تحديث مستوى الصوت
+        function updateVolume() {
+            globalVolume = parseFloat(volumeSlider.value);
+            if (currentAudio) {
+                currentAudio.volume = globalVolume;
+            }
+        }
+
+        // تفعيل الصوت
+        function enableAudio() {
+            if (audioEnabled) return;
+            
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                gainNode.gain.value = 0;
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.1);
+                
+                audioEnabled = true;
+                document.querySelector('.click-message').style.display = 'none';
+                soundStatus.textContent = 'Audio enabled! Click any sound to play.';
+                soundStatus.style.color = '#4ade80';
+                soundTest.textContent = '✓ Audio system ready';
+                soundTest.style.color = '#4ade80';
+                
+                document.removeEventListener('click', enableAudio);
+                document.removeEventListener('touchstart', enableAudio);
+            } catch (e) {
+                soundTest.textContent = '✗ Audio system not supported';
+                soundTest.style.color = '#f87171';
+            }
+        }
+
+        // اختبار جميع الأصوات
+        function testAllSounds() {
+            if (!audioEnabled) return;
+            
+            let workingSounds = 0;
+            sounds.forEach((sound, index) => {
+                setTimeout(() => {
+                    const testAudio = new Audio(sound.file);
+                    testAudio.volume = 0.1;
+                    testAudio.play().then(() => {
+                        workingSounds++;
+                        testAudio.pause();
+                    }).catch(() => {
+                        console.log(`Sound failed: ${sound.name}`);
+                    });
+                    
+                    if (index === sounds.length - 1) {
+                        setTimeout(() => {
+                            soundTest.textContent = `✓ ${workingSounds}/${sounds.length} sounds working`;
+                        }, 1000);
+                    }
+                }, index * 200);
+            });
+        }
+
+        // المستمعين للأحداث
+        startBtn.addEventListener('click', startTimer);
+        pauseBtn.addEventListener('click', pauseTimer);
+        resetBtn.addEventListener('click', resetTimer);
+        volumeSlider.addEventListener('input', updateVolume);
+
+        // تفعيل الصوت
+        document.addEventListener('click', enableAudio);
+        document.addEventListener('touchstart', enableAudio);
+
+        focusTimeInput.addEventListener('change', function() {
+            if (!isRunning && isFocusTime) {
+                timeLeft = parseInt(this.value) * 60;
+                updateDisplay();
+            }
+        });
+
+        breakTimeInput.addEventListener('change', function() {
+            if (!isRunning && !isFocusTime) {
+                timeLeft = parseInt(this.value) * 60;
+                updateDisplay();
+            }
+        });
+
+        // التهيئة
+        initializeBackgrounds();
+        initializeSounds();
+        createFloatingElements();
+        updateDisplay();
+
+        // اختبار الأصوات بعد التهيئة
+        setTimeout(() => {
+            if (audioEnabled) {
+                testAllSounds();
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
